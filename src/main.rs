@@ -1,3 +1,7 @@
+use chess_tokenizer::read_file;
+
 fn main() {
-    println!("Hello, world!");
+    read_file().expect("TODO: panic message");
 }
+
+

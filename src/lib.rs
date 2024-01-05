@@ -10,14 +10,14 @@ use std::fs;
 // score at end of move list
 
 pub fn read_file() -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string("Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
+    let contents = fs::read_to_string("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
 
     let (tags, moves) = split_game_data(&contents);
 
     if let Some(last_move) = moves.last() {
         let parts: Vec<&str> = last_move.split_whitespace().collect();
         if let Some(result) = parts.last() {
-            let game = build_game(tags, &moves, parse_result(result));
+            let game = build_game(tags, moves, parse_result(result));
             println!("DATA BUILT: {:?}", game);
         } else {
             println!("Could not find the result in the last move."); // maybe handle this case with U?
@@ -59,34 +59,47 @@ pub enum GameResult {
     W,
     B,
     D,
+    P,
 }
 
 #[derive(Debug)]
 pub struct Game {
     tags: HashMap<String, String>,
-    moves: HashMap<usize, String>,
-    result: GameResult
+    moves: Vec<String>,
+    result: GameResult,
+}
+
+pub fn clean_tag(raw_tag: &str) -> String {
+    raw_tag.replace("[", "")
+        .replace("]", "")
+        .replace("\"", "")
+        .replace("/", "")
 }
 
 pub fn split_tags(tag: &str) -> (String, String) {
     let parts: Vec<&str> = tag.split_whitespace().collect();
     if parts.len() >= 2 {
-        (parts[0].to_string(), parts[1].to_string())
+        let key = clean_tag(parts[0]);
+
+        let value = parts[1..].join(" "); // Needed in case there is whitespace in tag value
+        (key, clean_tag(&value))
     } else {
         panic!("Tag is not in the expected format: {}", tag)
-    }}
+    }
+}
 
-pub fn build_game(tags: Vec<&str>, move_list: &Vec<&str>, g_result: GameResult) -> Game  {
+pub fn build_game(tags: Vec<&str>, move_list: Vec<&str>, g_result: GameResult) -> Game  {
     let mut format_tags: HashMap<String, String> = HashMap::new();
-    let mut format_moves: HashMap<usize, String> = HashMap::new();
+    let mut format_moves: Vec<String> = Vec::new();
 
-    for tag in tags {
+    for &tag in tags.iter() {
         let (key, value) = split_tags(tag);
         format_tags.insert(key, value);
     }
 
-    for (index, m) in move_list.iter().enumerate() {
-        format_moves.insert(index + 1, m.to_string());
+    // Iterate over all except last, that is the game result
+    for &m in move_list[..move_list.len() - 1].iter() {
+        format_moves.push(m.to_string());
     }
 
     Game {
@@ -101,6 +114,7 @@ pub fn parse_result(result_str: &str) -> GameResult {
         "1-0" => GameResult::W,
         "0-1" => GameResult::B,
         "0.5-0.5" | "1/2-1/2" => GameResult::D,
+        "*" => GameResult::P, // Game postponed or something else like arbiter ended
         _ => panic!("Unexpected game result string: {}", result_str),
     }
 }

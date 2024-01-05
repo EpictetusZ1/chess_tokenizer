@@ -3,51 +3,79 @@ use std::error::Error;
 use std::fs;
 // use std::env;
 
-// Game is made up of:
-// tags
-// whitespace line (line break char), but might not always have this?
-// move list
-// score at end of move list
-
 pub fn read_file() -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
+    // let contents = fs::read_to_string("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
+    let contents = fs::read_to_string("games/Multi_1.pgn")?;
 
-    let (tags, moves) = split_game_data(&contents);
+    // TODO: Extract this out from the reading of the file further into a function called handle_games
+    let games = split_games(&contents);
 
-    if let Some(last_move) = moves.last() {
-        let parts: Vec<&str> = last_move.split_whitespace().collect();
-        if let Some(result) = parts.last() {
-            let game = build_game(tags, moves, parse_result(result));
-            println!("DATA BUILT: {:?}", game);
+    for game in games {
+        let (tags, moves) = parse_game_data(&game);
+
+        if let Some(last_move) = moves.last() {
+            let parts: Vec<&str> = last_move.split_whitespace().collect();
+            if let Some(result) = parts.last() {
+                let game = build_game(tags, moves, parse_result(result));
+                println!("Built Game Data: {:?}", game);
+            } else {
+                println!("Could not find the result in the last move.");
+            }
         } else {
-            println!("Could not find the result in the last move."); // maybe handle this case with U?
+            println!("There are no moves to analyze.");
         }
-    } else {
-        println!("There are no moves to analyze.");
     }
 
     Ok(())
 }
 
-pub fn split_game_data(contents: &str) -> (Vec<&str>, Vec<&str>) {
-    let mut tags= vec![];
-    let mut moves = vec![];
+pub fn split_games(file_contents: &str) -> Vec<String> {
+    let mut games: Vec<String> = Vec::new();
+    let mut cur_game: Vec<&str> = Vec::new();
 
-    let mut hit_empty_line = false;
+    let mut consecutive_empty_lines = 0;
 
-    let data: Vec<&str> = contents
-        .lines()
-        .collect();
+    for line in file_contents.lines() {
+        if line.trim().is_empty() {
+            consecutive_empty_lines += 1;
 
-    for chunk in data {
-        if chunk.is_empty() {
-            hit_empty_line = true;
-        } else {
-            if hit_empty_line {
-                moves.push(chunk);
-            } else {
-                tags.push(chunk);
+            // Two empty lines indicate end of current game
+            if consecutive_empty_lines == 2 && !cur_game.is_empty() {
+                games.push(cur_game.join("\n")); // Join the current game's lines into a single string
+                cur_game.clear(); // Prepare to start a new game
             }
+        } else {
+            consecutive_empty_lines = 0; // Reset count when a non-empty line is encountered
+            cur_game.push(line); // Add the line to the current game
+        }
+    }
+
+    // Handle the last game in the file (if it doesn't end with two empty lines)
+    if !cur_game.is_empty() {
+        games.push(cur_game.join("\n")); // Join the last game's lines into a single string
+    }
+
+    games
+}
+
+
+
+pub fn parse_game_data(contents: &str) -> (Vec<&str>, Vec<&str>) {
+    let mut tags = vec![];
+    let mut moves = vec![];
+    let mut reading_moves = false;
+
+    for chunk in contents.lines() {
+        // Lines starting with '[' are considered tags.
+        if chunk.starts_with('[') {
+            tags.push(chunk);
+            reading_moves = false;
+        } else if chunk.trim().is_empty() && !reading_moves {
+            // An empty line after tags indicates the start of moves.
+            reading_moves = true;
+        } else if reading_moves || !chunk.trim().is_empty() {
+            // Non-empty lines after the first empty line are considered moves.
+            moves.push(chunk);
         }
     }
 

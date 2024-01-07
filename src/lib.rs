@@ -3,30 +3,51 @@ use std::error::Error;
 use std::fs;
 // use std::env;
 
-pub fn read_file() -> Result<(), Box<dyn Error>> {
-    // let contents = fs::read_to_string("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
-    let contents = fs::read_to_string("games/Multi_1.pgn")?;
+pub mod tokenizer;
 
-    // TODO: Extract this out from the reading of the file further into a function called handle_games
+#[derive(Debug)]
+pub enum GameResult {
+    W,
+    B,
+    D,
+    P,
+}
+
+#[derive(Debug)]
+pub struct Game {
+    tags: HashMap<String, String>,
+    moves: Vec<String>,
+    result: GameResult,
+}
+
+pub fn read_file() -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string("games/Multi_1.pgn")?;
     let games = split_games(&contents);
 
+    process_games(games);
+    Ok(())
+}
+
+pub fn process_games(games: Vec<String>) {
     for game in games {
         let (tags, moves) = parse_game_data(&game);
-
-        if let Some(last_move) = moves.last() {
-            let parts: Vec<&str> = last_move.split_whitespace().collect();
-            if let Some(result) = parts.last() {
-                let game = build_game(tags, moves, parse_result(result));
-                println!("Built Game Data: {:?}", game);
-            } else {
-                println!("Could not find the result in the last move.");
-            }
-        } else {
-            println!("There are no moves to analyze.");
-        }
+        handle_game_result(&tags, &moves);
     }
+}
 
-    Ok(())
+pub fn handle_game_result(tags: &[&str], moves: &[&str]) {
+    if let Some(last_move) = moves.last() {
+        let parts: Vec<&str> = last_move.split_whitespace().collect();
+        if let Some(result) = parts.last() {
+
+            let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
+
+        } else {
+            eprintln!("Could not find the result in the last move.");
+        }
+    } else {
+        eprintln!("There are no moves to analyze.");
+    }
 }
 
 pub fn split_games(file_contents: &str) -> Vec<String> {
@@ -58,43 +79,25 @@ pub fn split_games(file_contents: &str) -> Vec<String> {
     games
 }
 
-
-
 pub fn parse_game_data(contents: &str) -> (Vec<&str>, Vec<&str>) {
     let mut tags = vec![];
     let mut moves = vec![];
     let mut reading_moves = false;
 
     for chunk in contents.lines() {
-        // Lines starting with '[' are considered tags.
-        if chunk.starts_with('[') {
+        if chunk.starts_with('[') { // Lines starting with '[' are considered tags
             tags.push(chunk);
             reading_moves = false;
         } else if chunk.trim().is_empty() && !reading_moves {
-            // An empty line after tags indicates the start of moves.
+            // An empty line after tags indicates the start of moves
             reading_moves = true;
         } else if reading_moves || !chunk.trim().is_empty() {
-            // Non-empty lines after the first empty line are considered moves.
+            // Non-empty lines after the first empty line are considered moves
             moves.push(chunk);
         }
     }
 
     (tags, moves)
-}
-
-#[derive(Debug)]
-pub enum GameResult {
-    W,
-    B,
-    D,
-    P,
-}
-
-#[derive(Debug)]
-pub struct Game {
-    tags: HashMap<String, String>,
-    moves: Vec<String>,
-    result: GameResult,
 }
 
 pub fn clean_tag(raw_tag: &str) -> String {
@@ -149,7 +152,7 @@ pub fn parse_result(result_str: &str) -> GameResult {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
 
     // #[test]
 }

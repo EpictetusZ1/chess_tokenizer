@@ -5,5 +5,3 @@ fn main() {
         eprintln!("Error reading file: {}", e);
     }
 }
-
-

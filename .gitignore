@@ -4,4 +4,4 @@
 .vscode
 
 # Project related
-.pgn
+/games/*.pgn

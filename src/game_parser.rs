@@ -1,5 +1,34 @@
-use crate::{split_moves, GameResult};
+use crate::{GameResult};
 
+
+pub fn split_games(file_contents: &str) -> Vec<String> {
+    let mut games: Vec<String> = Vec::new();
+    let mut cur_game = String::new();
+    let mut consecutive_empty_lines = 0;
+
+    for line in file_contents.lines() {
+        if line.trim().is_empty() {
+            consecutive_empty_lines += 1;
+            if consecutive_empty_lines == 2 {
+                if !cur_game.is_empty() {
+                    games.push(cur_game.trim_end_matches('\n').to_string());
+                    cur_game.clear();
+                }
+                consecutive_empty_lines = 0;
+            }
+        } else {
+            cur_game.push_str(line);
+            cur_game.push('\n');
+            consecutive_empty_lines = 0;
+        }
+    }
+
+    if !cur_game.is_empty() {
+        games.push(cur_game.trim_end_matches('\n').to_string());
+    }
+
+    games
+}
 pub fn parse_game_data(contents: &str) -> (Vec<&str>, Vec<String>) {
     let mut tags = vec![];
     let mut moves = vec![];
@@ -52,4 +81,26 @@ pub fn parse_result(result_str: &str) -> GameResult {
         "*" => GameResult::P, // Game postponed or something else like arbiter ended
         _ => panic!("Unexpected game result string: {}", result_str),
     }
+}
+
+pub fn split_moves(moves: &[&str]) -> Vec<String> {
+    let mut split_moves = Vec::new();
+
+    for &move_line in moves {
+        let words = move_line.split_whitespace();
+        for word in words {
+            // Split the word if move number and a move are together with no space
+            if let Some((number, move_)) = word.split_once('.') {
+                // Check if the part after the period isn't empty and push it as a move
+                if !move_.is_empty() {
+                    split_moves.push(move_.to_string());
+                }
+            } else {
+                // If there's no period, it's a move
+                split_moves.push(word.to_string());
+            }
+        }
+    }
+
+    split_moves
 }

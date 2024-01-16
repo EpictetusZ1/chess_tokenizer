@@ -1,12 +1,13 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use crate::game_parser::{parse_game_data, parse_result, split_tags};
+use crate::game_parser::{parse_game_data, parse_result, split_tags, split_games};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 
 mod game_parser;
 pub mod tokenizer;
+mod opening_book;
 
 #[derive(Debug)]
 pub enum GameResult {
@@ -30,6 +31,8 @@ pub struct Game {
     result: GameResult,
 }
 
+// TODO: Might need to add a sanitize function to clean up: comments, annotations, engine evaluations, etc
+
 pub fn read_file() -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
     // let contents = fs::read_to_string("games/Multi_1.pgn")?;
@@ -48,74 +51,24 @@ pub fn process_games(games: Vec<String>) {
     }
 }
 
-pub fn handle_game_result(tags: &[&str], moves: &Vec<String>) {
-    if let Some(last_move) = moves.last() {
-        let parts: Vec<&str> = last_move.split_whitespace().collect();
-        if let Some(result) = parts.last() {
-            let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
-            println!("Built Game Data: {:?}", game);
-        } else {
-            eprintln!("Could not find the result in the last move.");
-        }
-    } else {
-        eprintln!("There are no moves to analyze.");
-    }
-}
+pub fn handle_game_result(tags: &[&str], moves: &[String]) {
+    match moves.last() {
+        Some(last_move) => {
+            match last_move.split_whitespace().last() {
+                Some(result) => {
+                    let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
 
-enum GameState {
-    InsideGame,
-    OutsideGame,
-}
+                    let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
+                    game_tokens.tokenize();
+                    println!("Game Tokens: {:?}", game_tokens);
 
-pub fn split_games(file_contents: &str) -> Vec<String> {
-    let mut games: Vec<String> = Vec::new();
-    let mut cur_game = String::new();
-    let mut consecutive_empty_lines = 0;
-
-    for line in file_contents.lines() {
-        if line.trim().is_empty() {
-            consecutive_empty_lines += 1;
-            if consecutive_empty_lines == 2 {
-                if !cur_game.is_empty() {
-                    games.push(cur_game.trim_end_matches('\n').to_string());
-                    cur_game.clear();
-                }
-                consecutive_empty_lines = 0;
+                    // println!("Built Game Data: {:?}", game);
+                },
+                None => eprintln!("Could not find the result in the last move.")
             }
-        } else {
-            cur_game.push_str(line);
-            cur_game.push('\n');
-            consecutive_empty_lines = 0;
-        }
+        },
+        None => eprintln!("There are no moves to analyze.")
     }
-
-    if !cur_game.is_empty() {
-        games.push(cur_game.trim_end_matches('\n').to_string());
-    }
-
-    games
-}
-
-pub fn split_moves(moves: &[&str]) -> Vec<String> {
-    let mut split_moves = Vec::new();
-
-    for &move_line in moves {
-        let words = move_line.split_whitespace();
-        for word in words {
-            // Split the word if move number and a move are together with no space
-            if let Some((number, move_)) = word.split_once('.') {
-                // Check if the part after the period isn't empty and push it as a move
-                if !move_.is_empty() {
-                    split_moves.push(move_.to_string());
-                }
-            } else {
-                // If there's no period, it's a move
-                split_moves.push(word.to_string());
-            }
-        }
-    }
-
-    split_moves
 }
 
 pub fn build_game(tags: Vec<&str>, move_list: Vec<String>, g_result: GameResult) -> Game {

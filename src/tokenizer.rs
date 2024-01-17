@@ -1,9 +1,10 @@
+
 use crate::GameResult;
 
 #[derive(Debug)]
 pub struct Tokenizer {
     input: String,
-    tokens: Vec<String>,
+    pub(crate) tokens: Vec<String>,
 }
 
 // This is not currently used, but I might use it later

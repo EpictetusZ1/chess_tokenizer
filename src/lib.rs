@@ -7,7 +7,7 @@ use std::fs;
 
 pub mod tokenizer;
 mod game_parser;
-mod opening_book;
+pub mod opening_book;
 
 
 #[derive(Debug)]
@@ -28,49 +28,64 @@ pub struct Ply {
 #[derive(Debug)]
 pub struct Game {
     tags: HashMap<String, String>,
-    moves: Vec<String>,
+    pub moves: Vec<String>,
     result: GameResult,
 }
 
 // TODO: Might need to add a sanitize function to clean up: comments, annotations, engine evaluations, etc
 
-pub fn read_file() -> Result<(), Box<dyn Error>> {
+pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
     let contents = fs::read_to_string("games/bad.pgn")?;
     // let contents = fs::read_to_string("games/Multi_1.pgn")?;
     // let contents = fs::read_to_string("games/bad.pgn")?;
 
     let games = split_games(&contents);
-
-    process_games(games);
-    Ok(())
+    let processed_games = process_games(games);
+    Ok(processed_games)
+    // let games = split_games(&contents);
+    //
+    // process_games(games);
+    // Ok(())
 }
 
-pub fn process_games(games: Vec<String>) {
+pub fn process_games(games: Vec<String>) -> Vec<Game> {
+    let mut all_games: Vec<Game> = Vec::new();
+
     for game in games {
         let (tags, moves) = parse_game_data(&game);
-        handle_game_result(&tags, &moves);
+        if let Some(game) = handle_game_result(&tags, &moves) {
+            all_games.push(game);
+        }
     }
-}
 
-pub fn handle_game_result(tags: &[&str], moves: &[String]) {
+    all_games
+}
+// let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
+// game_tokens.tokenize();
+// println!("Game Tokens: {:?}", game_tokens);
+
+// println!("Built Game Data: {:?}", game);
+pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
     match moves.last() {
         Some(last_move) => {
             match last_move.split_whitespace().last() {
                 Some(result) => {
                     let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
-
-                    let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
-                    game_tokens.tokenize();
-                    println!("Game Tokens: {:?}", game_tokens);
-
-                    // println!("Built Game Data: {:?}", game);
+                    Some(game) // Return the Game object
                 },
-                None => eprintln!("Could not find the result in the last move.")
+                None => {
+                    eprintln!("Could not find the result in the last move.");
+                    None // Return None as no Game can be constructed
+                }
             }
         },
-        None => eprintln!("There are no moves to analyze.")
+        None => {
+            eprintln!("There are no moves to analyze.");
+            None // Return None as no Game can be constructed
+        }
     }
 }
+
 
 pub fn build_game(tags: Vec<&str>, move_list: Vec<String>, g_result: GameResult) -> Game {
     let mut format_tags: HashMap<String, String> = HashMap::new();

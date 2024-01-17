@@ -5,9 +5,10 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 
-mod game_parser;
 pub mod tokenizer;
+mod game_parser;
 mod opening_book;
+
 
 #[derive(Debug)]
 pub enum GameResult {
@@ -34,7 +35,7 @@ pub struct Game {
 // TODO: Might need to add a sanitize function to clean up: comments, annotations, engine evaluations, etc
 
 pub fn read_file() -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn")?;
+    let contents = fs::read_to_string("games/bad.pgn")?;
     // let contents = fs::read_to_string("games/Multi_1.pgn")?;
     // let contents = fs::read_to_string("games/bad.pgn")?;
 
@@ -98,15 +99,12 @@ mod tests {
 
     #[test]
     fn test_game_moves_length() {
-        // Assuming 'read_and_process_game' is a function that reads the PGN file,
-        // parses the data, and returns a Game struct
-        let game = read_and_process_game("games/Alexei Shirov_vs_Garry Kasparov_1997.__.__.pgn");
+        let game = read_and_process_game("games/bad.pgn");
 
-        // Assert that the length of the moves vector is 76
         assert_eq!(
             game.moves.len(),
-            76,
-            "The length of game moves should be 76"
+            82,
+            "The length of game moves should be 82"
         );
     }
 

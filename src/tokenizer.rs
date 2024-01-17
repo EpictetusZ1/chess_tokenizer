@@ -1,10 +1,3 @@
-// TODO:
-// 1. Normalize input - DONE
-// 2. Define what a token is
-// 3. Define token types
-// 4. Define tokenization rules
-// 5. Create builder for tokens
-
 use crate::GameResult;
 
 #[derive(Debug)]

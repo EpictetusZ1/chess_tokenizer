@@ -1,5 +1,9 @@
 use crate::Game;
-use crate::opening_book::GameNode;
+use crate::opening_tree::GameNode;
+
+
+// TODO: Add logic to check if the node already exists, and if it does, increment it and move it down
+
 
 pub fn traverse_tree(root_node: &mut GameNode, formatted_game_matrix: Vec<Game>, max_moves: usize) {
     for move_number in 0..max_moves {
@@ -21,11 +25,14 @@ pub fn traverse_tree(root_node: &mut GameNode, formatted_game_matrix: Vec<Game>,
                         children: Default::default(),
                     };
 
-                    current_node = current_node.add_child(p.clone(), new_node);
-                    println!("Current node value is {:?}", current_node);
-                    println!("Move at game number: {:?} is {:?}", move_number, p);
+                    current_node = current_node.add_child(p, new_node);
+                    // println!("Current node value is {:?}", current_node);
+                    // println!("Move at game number: {:?} is {:?}", move_number, p);
                 }
             }
         }
     }
 }
+
+
+// ["d3", "d4", "e4", "Nf3", "e3", "f4", "g4", "b3", "c4", "Nc3", "g3"]

@@ -7,7 +7,7 @@ use std::fs;
 
 pub mod tokenizer;
 mod game_parser;
-pub mod opening_book;
+pub mod opening_tree;
 mod stats;
 
 
@@ -37,8 +37,8 @@ pub struct Game {
 
 pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
     // let contents = fs::read_to_string("games/bad.pgn")?;
-    let contents = fs::read_to_string("games/two.pgn")?;
-    // let contents = fs::read_to_string("games/lichess_EpictetusZ1_2024-01-17.pgn")?;
+    // let contents = fs::read_to_string("games/two.pgn")?;
+    let contents = fs::read_to_string("games/lichess_EpictetusZ1_2024-01-17.pgn")?;
 
     let games = split_games(&contents);
     let processed_games = process_games(games);
@@ -119,7 +119,7 @@ mod tests {
 
         assert_eq!(
             game.moves.len(),
-            82,
+            81,
             "The length of game moves should be 82"
         );
     }

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::GameResult;
+// use crate::GameResult;
 
 
 #[derive(Debug)]
@@ -34,6 +34,24 @@ impl GameNode {
 
         // Create the new GameNode, then add it to the parents children hashmap
         self.children.get_mut(&new_ply).unwrap()
+    }
+
+    pub fn get_children(&self) -> Option<&HashMap<String, GameNode>> {
+        Some(&self.children)
+    }
+    // -> Option<Vec<String>>
+    pub fn get_first_child(&self)  {
+        let has_child = Some(&self.children);
+        // .filter_map(|(key, &val)| if val == value { Some(key) } else { None })
+        // let keys: Vec<&str> = map.keys().cloned().collect();
+
+        if let Some(child) = has_child {
+            // let child_keys = self.children.iter().filter_map(|(key, value)| Some(key));
+            let child_keys: Vec<String> = self.children.keys().cloned().collect();
+
+            println!("This nodes current child edges are: {:?}", child_keys);
+        };
+
     }
 
     // TODO: Write add game result method

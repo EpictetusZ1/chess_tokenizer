@@ -38,7 +38,7 @@ pub struct Game {
 pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
     // let contents = fs::read_to_string("games/bad.pgn")?;
     let contents = fs::read_to_string("games/two.pgn")?;
-    // let contents = fs::read_to_string("games/bad.pgn")?;
+    // let contents = fs::read_to_string("games/lichess_EpictetusZ1_2024-01-17.pgn")?;
 
     let games = split_games(&contents);
     let processed_games = process_games(games);

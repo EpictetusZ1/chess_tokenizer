@@ -1,3 +1,5 @@
+pub mod traverse;
+
 use std::collections::HashMap;
 // use crate::GameResult;
 
@@ -39,19 +41,20 @@ impl GameNode {
     pub fn get_children(&self) -> Option<&HashMap<String, GameNode>> {
         Some(&self.children)
     }
+
     // -> Option<Vec<String>>
-    pub fn get_first_child(&self)  {
+    pub fn get_child_keys(&self) -> Vec<String>  {
         let has_child = Some(&self.children);
+        let mut child_keys = vec![];
         // .filter_map(|(key, &val)| if val == value { Some(key) } else { None })
         // let keys: Vec<&str> = map.keys().cloned().collect();
 
         if let Some(child) = has_child {
             // let child_keys = self.children.iter().filter_map(|(key, value)| Some(key));
-            let child_keys: Vec<String> = self.children.keys().cloned().collect();
+             child_keys = self.children.keys().cloned().collect()
+        }
 
-            println!("This nodes current child edges are: {:?}", child_keys);
-        };
-
+        child_keys
     }
 
     // TODO: Write add game result method

@@ -8,6 +8,7 @@ use std::fs;
 pub mod tokenizer;
 mod game_parser;
 pub mod opening_book;
+mod stats;
 
 
 #[derive(Debug)]
@@ -27,16 +28,16 @@ pub struct Ply {
 
 #[derive(Debug)]
 pub struct Game {
-    tags: HashMap<String, String>,
+    pub tags: HashMap<String, String>,
     pub moves: Vec<String>,
-    result: GameResult,
+    pub result: GameResult,
 }
 
 // TODO: Might need to add a sanitize function to clean up: comments, annotations, engine evaluations, etc
 
 pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
-    let contents = fs::read_to_string("games/bad.pgn")?;
-    // let contents = fs::read_to_string("games/Multi_1.pgn")?;
+    // let contents = fs::read_to_string("games/bad.pgn")?;
+    let contents = fs::read_to_string("games/two.pgn")?;
     // let contents = fs::read_to_string("games/bad.pgn")?;
 
     let games = split_games(&contents);

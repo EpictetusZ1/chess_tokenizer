@@ -1,29 +1,26 @@
 use std::collections::HashMap;
+use crate::GameResult;
 
-pub struct Stats {
-    wins: u16,
-    losses: u16,
-    draws: u16,
-}
 
+#[derive(Debug)]
 pub struct GameNode {
-    ply: String,
-    ply_stats: Stats,
-    frequency: u16,
-    children: HashMap<str, GameNode> // Key is ply count
+    pub ply: u16,
+    // pub ply_stats: Stats,
+    pub frequency: u16,
+    pub children: HashMap<String, GameNode> // Key is the next move
 }
 
 impl GameNode {
-    pub fn new(ply: String) -> GameNode {
-        let default = Stats {
-            wins: 0,
-            losses: 0,
-            draws: 0,
-        };
+    pub fn new() -> GameNode {
+        // let default = Stats {
+        //     wins: 0,
+        //     losses: 0,
+        //     draws: 0,
+        // };
 
         GameNode {
-            ply,
-            ply_stats: default,
+            ply: 0,
+            // ply_stats: default,
             frequency: 1,
             children: HashMap::new(),
         }
@@ -31,26 +28,13 @@ impl GameNode {
 
     // Since we are only going to check the parent node, I can use a single hashmap (not nested ones)
     // since the information about the previous ply is solely contained within the parent node, there is no risk of collision
-    pub fn add_child(&self, new_ply: String) {
-        let opt = Option::None::<HashMap<&str, GameNode>>;
-        let x = match opt {
-            Some(i) => i.get(&new_ply),
-            None => None,
-        };
+    pub fn add_child(&mut self, new_ply: String, new_node: GameNode) -> &mut GameNode {
+        // Insert the new GameNode into the children hashmap
+        self.children.insert(new_ply.clone(), new_node);
+
         // Create the new GameNode, then add it to the parents children hashmap
-        match self.children {
-            Some(x) => println!("good?"),
-            None() => None,
-            _ => println!("not good"),
-        }
+        self.children.get_mut(&new_ply).unwrap()
     }
 
     // TODO: Write add game result method
 }
-
-// A Tree is a collection of nodes that are connected by edges
-// the topmost node is called the root node, the nodes below it are called child nodes
-
-// Requirements:
-// Take a Vec of Game Structs,
-

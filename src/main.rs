@@ -11,7 +11,7 @@ fn main() {
     let max_moves = 1;
 
     traverse_tree(&mut root, formatted_game_matrix, max_moves);
-    // println!("root node is: {:?}", root);
+    println!("root node is: {:#?}", root);
     println!("roots children keys are: {:?}", root.get_child_keys());
 }
 
@@ -23,7 +23,7 @@ mod tests {
     fn test_correct_first_ply() {
         let formatted_game_matrix = read_file().unwrap();
         let mut root = GameNode::new();
-        let max_moves = 1;
+        let max_moves = 2;
 
         traverse_tree(&mut root, formatted_game_matrix, max_moves);
 

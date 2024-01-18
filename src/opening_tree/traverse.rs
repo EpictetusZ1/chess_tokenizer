@@ -3,8 +3,6 @@ use crate::opening_tree::GameNode;
 
 
 // TODO: Add logic to check if the node already exists, and if it does, increment it and move it down
-
-
 pub fn traverse_tree(root_node: &mut GameNode, formatted_game_matrix: Vec<Game>, max_moves: usize) {
     for move_number in 0..max_moves {
 
@@ -34,5 +32,3 @@ pub fn traverse_tree(root_node: &mut GameNode, formatted_game_matrix: Vec<Game>,
     }
 }
 
-
-// ["d3", "d4", "e4", "Nf3", "e3", "f4", "g4", "b3", "c4", "Nc3", "g3"]

@@ -35,7 +35,10 @@ impl GameNode {
     // since the information about the previous ply is solely contained within the parent node, there is no risk of collision
     pub fn add_child(&mut self, new_ply: &str, new_node: GameNode) -> &mut GameNode {
         if self.check_child(&new_ply) {
-           self.children.get_mut(new_ply).unwrap()
+            let updated = self.children.get_mut(new_ply).unwrap();
+            // This seems to be working correctly, there are 234 1. e4 moves in the lichess (my games) file, and the freq of e4 is 234 in the tree
+            updated.frequency += 1;
+            updated
         } else {
             // Insert the new GameNode into the children hashmap
             self.children.insert(String::from(new_ply), new_node);

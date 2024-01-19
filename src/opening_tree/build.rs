@@ -1,5 +1,6 @@
-use crate::Game;
+use crate::{Game, GameResult};
 use crate::opening_tree::{GameNode, ViewPerspective};
+use crate::stats::Stats;
 
 // TODO: One idea would be to set the stats for the first node, then decrement each set of new stats based on what the game result is
 pub fn build_tree(root_node: &mut GameNode, formatted_game_matrix: &Vec<Game>, max_moves: &usize, view_perspective: &ViewPerspective) {
@@ -15,3 +16,21 @@ pub fn build_tree(root_node: &mut GameNode, formatted_game_matrix: &Vec<Game>, m
     }
 }
 
+pub fn init_stats(formatted_game_matrix: &Vec<Game>) -> Stats {
+    // Loop through all the games, and just increase each stat according to what happened
+    let mut all_stats = Stats {
+        white: 0,
+        black: 0,
+        draws: 0,
+    };
+
+    for game in formatted_game_matrix {
+        match game.result {
+            GameResult::W =>   all_stats.white += 1,
+            GameResult::B =>   all_stats.black += 1,
+            GameResult::D =>   all_stats.draws += 1,
+        }
+    }
+
+    all_stats
+}

@@ -1,12 +1,12 @@
 use chess_tokenizer::read_file;
 use chess_tokenizer::opening_tree::{GameNode, ViewPerspective};
-use chess_tokenizer::opening_tree::build::build_tree;
+use chess_tokenizer::opening_tree::build::{build_tree, init_stats};
 
 
 // TODO: Create input loop, to interact with tree
 fn main() {
     let formatted_game_matrix = read_file().unwrap();
-    let mut root  = GameNode::new(0);
+    let mut root  = GameNode::new(0, Some(init_stats(&formatted_game_matrix)));
     let max_moves = 3;
     let view_perspective = ViewPerspective::White(String::from("white"));
 

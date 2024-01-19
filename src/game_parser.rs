@@ -79,7 +79,6 @@ pub fn parse_result(result_str: &str) -> GameResult {
         "1-0" => GameResult::W,
         "0-1" => GameResult::B,
         "0.5-0.5" | "1/2-1/2" => GameResult::D,
-        "*" => GameResult::P, // Game postponed or something else like arbiter ended
         _ => panic!("Unexpected game result string: {}", result_str),
     }
 }

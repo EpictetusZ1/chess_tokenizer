@@ -14,12 +14,11 @@ pub mod opening_tree;
 mod stats;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum GameResult {
     W,
     B,
     D,
-    P,
 }
 
 #[derive(Debug)]
@@ -51,6 +50,7 @@ pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
 #[cfg(test)]
 mod tests {
     use crate::game_parser::build_game;
+    use crate::opening_tree::ViewPerspective;
     use super::*;
 
     #[test]
@@ -80,10 +80,11 @@ mod tests {
     #[test]
     fn test_correct_first_ply() {
         let formatted_game_matrix = read_file().unwrap();
-        let mut root = GameNode::new();
+        let mut root = GameNode::new(0);
         let max_moves = 2;
+        let view_perspective = ViewPerspective::White(String::from("white"));
 
-        build_tree(&mut root, formatted_game_matrix, max_moves);
+        build_tree(&mut root, &formatted_game_matrix, &max_moves, &view_perspective);
 
         let expected_moves = ["d3", "d4", "e4", "Nf3", "e3", "f4", "g4", "b3", "c4", "Nc3", "g3"];
         let root_child_keys = root.get_child_keys();

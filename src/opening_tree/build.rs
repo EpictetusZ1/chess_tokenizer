@@ -16,26 +16,16 @@ pub fn build_tree(root_node: &mut GameNode, formatted_game_matrix: &Vec<Game>, m
     }
 }
 
-pub fn init_stats(formatted_game_matrix: &Vec<Game>) -> Stats {
-    // Loop through all the games, and just increase each stat according to what happened
-    let mut all_stats = Stats {
-        white: 0,
-        black: 0,
-        draws: 0,
-    };
-
-    for game in formatted_game_matrix {
-        match game.result {
-            GameResult::W =>   all_stats.white += 1,
-            GameResult::B =>   all_stats.black += 1,
-            GameResult::D =>   all_stats.draws += 1,
-        }
-    }
-
-    all_stats
-}
-
-
-// pub fn init_freq(game_vec_length: u16) -> u16 {
-//     game_vec_length
+// pub fn get_ply(root: GameNode, mov: String) -> Vec<GameNode> {
+//     let mut prep_for_print= vec![root];
+//
+//     if let Some(next_node) = root.children.get(&mov) {
+//         let child_nodes = &next_node.children;
+//
+//         for (key, child) in child_nodes {
+//             prep_for_print.push(child)
+//         }
+//
+//     }
+//     prep_for_print
 // }

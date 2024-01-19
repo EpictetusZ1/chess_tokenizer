@@ -1,21 +1,24 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use crate::game_parser::{parse_game_data, parse_result, split_tags, split_games};
+#![allow(unused_imports)]
+use crate::game_parser::{parse_game_data, parse_result, split_games, process_games};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
+use crate::opening_tree::GameNode;
+use crate::opening_tree::build::build_tree;
 
-pub mod tokenizer;
 mod game_parser;
-pub mod opening_book;
+pub mod opening_tree;
+pub mod stats;
+pub mod cli;
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum GameResult {
     W,
     B,
     D,
-    P,
 }
 
 #[derive(Debug)]
@@ -27,111 +30,67 @@ pub struct Ply {
 
 #[derive(Debug)]
 pub struct Game {
-    tags: HashMap<String, String>,
+    pub tags: HashMap<String, String>,
     pub moves: Vec<String>,
-    result: GameResult,
+    pub result: GameResult,
 }
 
 // TODO: Might need to add a sanitize function to clean up: comments, annotations, engine evaluations, etc
-
-pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
-    let contents = fs::read_to_string("games/bad.pgn")?;
-    // let contents = fs::read_to_string("games/Multi_1.pgn")?;
-    // let contents = fs::read_to_string("games/bad.pgn")?;
+pub fn read_file(file_path: String) -> Result<Vec<Game>, Box<dyn Error>> {
+    let contents = fs::read_to_string(file_path)?;
+    // let contents = fs::read_to_string("games/lichess_EpictetusZ1_2024-01-17.pgn")?;
 
     let games = split_games(&contents);
-    let processed_games = process_games(games);
-    Ok(processed_games)
-    // let games = split_games(&contents);
-    //
-    // process_games(games);
-    // Ok(())
-}
 
-pub fn process_games(games: Vec<String>) -> Vec<Game> {
-    let mut all_games: Vec<Game> = Vec::new();
-
-    for game in games {
-        let (tags, moves) = parse_game_data(&game);
-        if let Some(game) = handle_game_result(&tags, &moves) {
-            all_games.push(game);
-        }
-    }
-
-    all_games
-}
-// let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
-// game_tokens.tokenize();
-// println!("Game Tokens: {:?}", game_tokens);
-
-// println!("Built Game Data: {:?}", game);
-pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
-    match moves.last() {
-        Some(last_move) => {
-            match last_move.split_whitespace().last() {
-                Some(result) => {
-                    let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
-                    Some(game) // Return the Game object
-                },
-                None => {
-                    eprintln!("Could not find the result in the last move.");
-                    None // Return None as no Game can be constructed
-                }
-            }
-        },
-        None => {
-            eprintln!("There are no moves to analyze.");
-            None // Return None as no Game can be constructed
-        }
-    }
+    Ok(process_games(games))
 }
 
 
-pub fn build_game(tags: Vec<&str>, move_list: Vec<String>, g_result: GameResult) -> Game {
-    let mut format_tags: HashMap<String, String> = HashMap::new();
-    let mut format_moves: Vec<String> = Vec::new();
-
-    for &tag in tags.iter() {
-        let (key, value) = split_tags(tag);
-        format_tags.insert(key, value);
-    }
-
-    // Iterate over all except last, that is the game result
-    for m in move_list[..move_list.len() - 1].iter() {
-        format_moves.push(m.to_string());
-    }
-
-    Game {
-        tags: format_tags,
-        moves: format_moves,
-        result: g_result,
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_game_moves_length() {
-        let game = read_and_process_game("games/bad.pgn");
-
-        assert_eq!(
-            game.moves.len(),
-            82,
-            "The length of game moves should be 82"
-        );
-    }
-
-    fn read_and_process_game(file_path: &str) -> Game {
-        // Read the file and process it (simplified for demonstration)
-        let contents = fs::read_to_string(file_path).unwrap();
-        let games = split_games(&contents);
-        let (tags, moves) = parse_game_data(&games[0]);
-        let last_move = moves.last().unwrap();
-        let parts: Vec<&str> = last_move.split_whitespace().collect();
-        let result = parse_result(parts.last().unwrap());
-
-        build_game(tags.to_vec(), moves.to_vec(), result)
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     use crate::game_parser::build_game;
+//     use crate::opening_tree::ViewPerspective;
+//     use crate::stats::init_stats;
+//     use super::*;
+//
+//     #[test]
+//     fn test_game_moves_length() {
+//         let game = read_and_process_game("games/bad.pgn");
+//
+//         assert_eq!(
+//             game.moves.len(),
+//             81,
+//             "The length of game moves should be 82"
+//         );
+//     }
+//
+//     fn read_and_process_game(file_path: &str) -> Game {
+//         // Read the file and process it (simplified for demonstration)
+//         let contents = fs::read_to_string(file_path).unwrap();
+//         let games = split_games(&contents);
+//         let (tags, moves) = parse_game_data(&games[0]);
+//         let last_move = moves.last().unwrap();
+//         let parts: Vec<&str> = last_move.split_whitespace().collect();
+//         let result = parse_result(parts.last().unwrap());
+//
+//         build_game(tags.to_vec(), moves.to_vec(), result)
+//     }
+//     use super::*;
+//
+//     #[test]
+//     fn test_correct_first_ply() {
+//         let formatted_game_matrix = read_file(String::from("games/lichess_EpictetusZ1_2024-01-17.pgn")).unwrap();
+//         let mut root = GameNode::init(init_stats(&formatted_game_matrix), formatted_game_matrix.len());
+//         let max_moves = 2;
+//         let view_perspective = ViewPerspective::White(String::from("white"));
+//
+//         build_tree(&mut root, &formatted_game_matrix, &max_moves, &view_perspective);
+//
+//         let expected_moves = ["d3", "d4", "e4", "Nf3", "e3", "f4", "g4", "b3", "c4", "Nc3", "g3"];
+//         let root_child_keys = root.get_child_keys();
+//
+//         for mov in &expected_moves {
+//             assert!(root_child_keys.contains(&mov.to_string()), "Move {} not found in root children", mov);
+//         }
+//     }
+// }

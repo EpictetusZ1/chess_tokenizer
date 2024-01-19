@@ -1,4 +1,5 @@
-use crate::{GameResult};
+use std::collections::HashMap;
+use crate::{Game, GameResult};
 
 
 pub fn split_games(file_contents: &str) -> Vec<String> {
@@ -78,7 +79,6 @@ pub fn parse_result(result_str: &str) -> GameResult {
         "1-0" => GameResult::W,
         "0-1" => GameResult::B,
         "0.5-0.5" | "1/2-1/2" => GameResult::D,
-        "*" => GameResult::P, // Game postponed or something else like arbiter ended
         _ => panic!("Unexpected game result string: {}", result_str),
     }
 }
@@ -103,4 +103,64 @@ pub fn split_moves(moves: &[&str]) -> Vec<String> {
     }
 
     split_moves
+}
+
+pub fn process_games(games: Vec<String>) -> Vec<Game> {
+    let mut all_games: Vec<Game> = Vec::new();
+
+    for game in games {
+        let (tags, moves) = parse_game_data(&game);
+        if let Some(game) = handle_game_result(&tags, &moves) {
+            all_games.push(game);
+        }
+    }
+
+    all_games
+}
+// let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
+// game_tokens.tokenize();
+// println!("Game Tokens: {:?}", game_tokens);
+
+// println!("Built Game Data: {:?}", game);
+pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
+    match moves.last() {
+        Some(last_move) => {
+            match last_move.split_whitespace().last() {
+                Some(result) => {
+                    let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
+                    Some(game) // Return the Game object
+                },
+                None => {
+                    eprintln!("Could not find the result in the last move.");
+                    None // Return None as no Game can be constructed
+                }
+            }
+        },
+        None => {
+            eprintln!("There are no moves to analyze.");
+            None // Return None as no Game can be constructed
+        }
+    }
+}
+
+
+pub fn build_game(tags: Vec<&str>, move_list: Vec<String>, g_result: GameResult) -> Game {
+    let mut format_tags: HashMap<String, String> = HashMap::new();
+    let mut format_moves: Vec<String> = Vec::new();
+
+    for &tag in tags.iter() {
+        let (key, value) = split_tags(tag);
+        format_tags.insert(key, value);
+    }
+
+    // Iterate over all except last, that is the game result
+    for m in move_list[..move_list.len() - 1].iter() {
+        format_moves.push(m.to_string());
+    }
+
+    Game {
+        tags: format_tags,
+        moves: format_moves,
+        result: g_result,
+    }
 }

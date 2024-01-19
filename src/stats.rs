@@ -2,6 +2,7 @@ use crate::GameResult;
 use crate::opening_tree::ViewPerspective;
 
 #[derive(Debug)]
+#[derive(Clone, Copy)] // Add this if Stats only contains copyable types
 pub struct Stats {
     pub white: u16,
     pub black: u16,
@@ -10,15 +11,15 @@ pub struct Stats {
 
 // TODO: Start over and get each piece working correctly before trying to implement more than I can handle
 
-impl Stats {
-    pub fn increment_stats(&mut self, result: GameResult) {
-        match result {
-            GameResult::W =>   self.white += 1,
-            GameResult::B =>   self.black += 1,
-            GameResult::D =>   self.draws += 1,
-        }
-    }
-}
+// impl Stats {
+//     pub fn increment_stats(&mut self, result: GameResult) {
+//         match result {
+//             GameResult::W =>   self.white += 1,
+//             GameResult::B =>   self.black += 1,
+//             GameResult::D =>   self.draws += 1,
+//         }
+//     }
+// }
 
 // Can be shared by Game and Stats
 // pub trait IsWinner {

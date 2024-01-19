@@ -10,7 +10,7 @@ pub fn build_tree(root_node: &mut GameNode, formatted_game_matrix: &Vec<Game>, m
 
         for ply_number in 0..*max_moves {
             if let Some(mov) = game.moves.get(ply_number) {
-                current_node = current_node.add_or_update_child(mov, game.result);
+                current_node = current_node.add_or_update_child(mov, game.result, &current_node.stats.clone());
             }
         }
     }
@@ -34,3 +34,8 @@ pub fn init_stats(formatted_game_matrix: &Vec<Game>) -> Stats {
 
     all_stats
 }
+
+
+// pub fn init_freq(game_vec_length: u16) -> u16 {
+//     game_vec_length
+// }

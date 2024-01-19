@@ -50,6 +50,7 @@ pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
 #[cfg(test)]
 mod tests {
     use crate::game_parser::build_game;
+    use crate::opening_tree::build::init_stats;
     use crate::opening_tree::ViewPerspective;
     use super::*;
 
@@ -80,7 +81,7 @@ mod tests {
     #[test]
     fn test_correct_first_ply() {
         let formatted_game_matrix = read_file().unwrap();
-        let mut root = GameNode::new(0);
+        let mut root = GameNode::init(init_stats(&formatted_game_matrix), formatted_game_matrix.len());
         let max_moves = 2;
         let view_perspective = ViewPerspective::White(String::from("white"));
 

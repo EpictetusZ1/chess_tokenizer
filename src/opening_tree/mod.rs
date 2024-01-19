@@ -1,4 +1,4 @@
-pub mod traverse;
+pub mod build;
 
 use std::collections::HashMap;
 
@@ -6,44 +6,32 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct GameNode {
     pub ply: u16,
-    // pub ply_stats: Stats,
     pub frequency: u16,
     pub children: HashMap<String, GameNode> // Key is the next move
 }
 
 impl GameNode {
     pub fn new() -> GameNode {
-        // let default = Stats {
-        //     wins: 0,
-        //     losses: 0,
-        //     draws: 0,
-        // };
-
         GameNode {
             ply: 0,
-            // ply_stats: default,
             frequency: 1,
             children: HashMap::new(),
         }
     }
 
-    fn check_child(&self, new_ply: &str) -> bool {
-        self.children.contains_key(new_ply)
-    }
+    pub fn add_or_update_child(&mut self, mov: &str) -> &mut Self {
+        self.children.entry(mov.to_string())
+            .and_modify(|child| {
+                // If move exists increment freq
+                child.frequency += 1;
+            })
+            .or_insert_with(|| GameNode {
+                ply: self.ply + 1,
+                frequency: 1,
+                children: HashMap::new(),
+            });
 
-    // Since we are only going to check the parent node, I can use a single hashmap (not nested ones)
-    // since the information about the previous ply is solely contained within the parent node, there is no risk of collision
-    pub fn add_child(&mut self, new_ply: &str, new_node: GameNode) -> &mut GameNode {
-        if self.check_child(&new_ply) {
-            let updated = self.children.get_mut(new_ply).unwrap();
-            // This seems to be working correctly, there are 234 1. e4 moves in the lichess (my games) file, and the freq of e4 is 234 in the tree
-            updated.frequency += 1;
-            updated
-        } else {
-            // Insert the new GameNode into the children hashmap
-            self.children.insert(String::from(new_ply), new_node);
-            self.children.get_mut(new_ply).unwrap()
-        }
+        self.children.get_mut(mov).unwrap()
     }
 
     pub fn get_children(&self) -> Option<&HashMap<String, GameNode>> {

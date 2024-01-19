@@ -1,9 +1,12 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
-use crate::game_parser::{parse_game_data, parse_result, split_tags, split_games};
+#![allow(unused_imports)]
+use crate::game_parser::{parse_game_data, parse_result, split_games, process_games};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
+use crate::opening_tree::GameNode;
+use crate::opening_tree::build::build_tree;
 
 pub mod tokenizer;
 mod game_parser;
@@ -34,83 +37,20 @@ pub struct Game {
 }
 
 // TODO: Might need to add a sanitize function to clean up: comments, annotations, engine evaluations, etc
-
 pub fn read_file() -> Result<Vec<Game>, Box<dyn Error>> {
     // let contents = fs::read_to_string("games/bad.pgn")?;
     // let contents = fs::read_to_string("games/two.pgn")?;
     let contents = fs::read_to_string("games/lichess_EpictetusZ1_2024-01-17.pgn")?;
 
     let games = split_games(&contents);
-    let processed_games = process_games(games);
-    Ok(processed_games)
-    // let games = split_games(&contents);
-    //
-    // process_games(games);
-    // Ok(())
+
+    Ok(process_games(games))
 }
 
-pub fn process_games(games: Vec<String>) -> Vec<Game> {
-    let mut all_games: Vec<Game> = Vec::new();
-
-    for game in games {
-        let (tags, moves) = parse_game_data(&game);
-        if let Some(game) = handle_game_result(&tags, &moves) {
-            all_games.push(game);
-        }
-    }
-
-    all_games
-}
-// let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
-// game_tokens.tokenize();
-// println!("Game Tokens: {:?}", game_tokens);
-
-// println!("Built Game Data: {:?}", game);
-pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
-    match moves.last() {
-        Some(last_move) => {
-            match last_move.split_whitespace().last() {
-                Some(result) => {
-                    let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
-                    Some(game) // Return the Game object
-                },
-                None => {
-                    eprintln!("Could not find the result in the last move.");
-                    None // Return None as no Game can be constructed
-                }
-            }
-        },
-        None => {
-            eprintln!("There are no moves to analyze.");
-            None // Return None as no Game can be constructed
-        }
-    }
-}
-
-
-pub fn build_game(tags: Vec<&str>, move_list: Vec<String>, g_result: GameResult) -> Game {
-    let mut format_tags: HashMap<String, String> = HashMap::new();
-    let mut format_moves: Vec<String> = Vec::new();
-
-    for &tag in tags.iter() {
-        let (key, value) = split_tags(tag);
-        format_tags.insert(key, value);
-    }
-
-    // Iterate over all except last, that is the game result
-    for m in move_list[..move_list.len() - 1].iter() {
-        format_moves.push(m.to_string());
-    }
-
-    Game {
-        tags: format_tags,
-        moves: format_moves,
-        result: g_result,
-    }
-}
 
 #[cfg(test)]
 mod tests {
+    use crate::game_parser::build_game;
     use super::*;
 
     #[test]
@@ -134,5 +74,22 @@ mod tests {
         let result = parse_result(parts.last().unwrap());
 
         build_game(tags.to_vec(), moves.to_vec(), result)
+    }
+    use super::*;
+
+    #[test]
+    fn test_correct_first_ply() {
+        let formatted_game_matrix = read_file().unwrap();
+        let mut root = GameNode::new();
+        let max_moves = 2;
+
+        build_tree(&mut root, formatted_game_matrix, max_moves);
+
+        let expected_moves = ["d3", "d4", "e4", "Nf3", "e3", "f4", "g4", "b3", "c4", "Nc3", "g3"];
+        let root_child_keys = root.get_child_keys();
+
+        for mov in &expected_moves {
+            assert!(root_child_keys.contains(&mov.to_string()), "Move {} not found in root children", mov);
+        }
     }
 }

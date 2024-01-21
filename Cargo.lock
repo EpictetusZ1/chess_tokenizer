@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "chess_tokenizer"
+name = "opening_tree"
 version = "0.1.0"

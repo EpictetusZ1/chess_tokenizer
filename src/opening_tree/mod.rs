@@ -1,4 +1,5 @@
 pub mod build;
+pub mod navigator;
 
 use std::collections::HashMap;
 use crate::{GameResult, Ply};
@@ -62,7 +63,7 @@ impl GameNode {
         self
     }
 
-    pub fn get_children(&self) -> Option<&HashMap<String, GameNode>> {
+    pub fn get_child(&self) -> Option<&HashMap<String, GameNode>> {
         Some(&self.children)
     }
 

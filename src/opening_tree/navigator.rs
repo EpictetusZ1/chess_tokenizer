@@ -1,4 +1,6 @@
-use crate::opening_tree::GameNode;
+use crate::Game;
+use crate::opening_tree::{GameNode, ViewPerspective};
+use crate::opening_tree::build::build_tree;
 
 #[derive(Debug)]
 pub struct GameTreeNavigator {
@@ -21,6 +23,10 @@ impl GameTreeNavigator {
             node = node.children.get_mut(mov_key).expect("Invalid path");
         }
         node
+    }
+
+    pub fn current_path(&self) -> &Vec<String> {
+        &self.path
     }
 
     pub fn get_root_mut(&mut self) -> &mut GameNode {

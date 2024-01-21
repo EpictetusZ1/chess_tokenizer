@@ -6,7 +6,6 @@ use opening_tree::opening_tree::navigator::GameTreeNavigator;
 use opening_tree::stats::init_stats;
 
 
-
 fn main() {
         println!("Enter a pgn file to get started: ");
 
@@ -21,7 +20,7 @@ fn main() {
 
         let mut navigator = GameTreeNavigator::new(root);
 
-        cli::run_cli(&mut navigator);
+        cli::run_cli(&mut navigator, &formatted_game_matrix, &view_perspective);
 }
 
 #[cfg(test)]

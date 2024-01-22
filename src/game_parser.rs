@@ -117,11 +117,7 @@ pub fn process_games(games: Vec<String>) -> Vec<Game> {
 
     all_games
 }
-// let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
-// game_tokens.tokenize();
-// println!("Game Tokens: {:?}", game_tokens);
 
-// println!("Built Game Data: {:?}", game);
 pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
     match moves.last() {
         Some(last_move) => {

@@ -1,7 +1,6 @@
-pub mod build;
 pub mod navigator;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use crate::{GameResult, Ply};
 use crate::stats::Stats;
 
@@ -19,6 +18,7 @@ pub struct GameNode {
     pub frequency: u16,
     pub children: HashMap<String, GameNode>, // Key is the next move
     pub children_fully_built: bool,
+    pub game_ids: HashSet<usize>, // Tracking unique game IDs
 }
 
 #[derive(Debug)]
@@ -35,6 +35,7 @@ impl GameNode {
             frequency: total_freq as u16,
             children: HashMap::new(),
             children_fully_built: false,
+            game_ids: HashSet::new(),
         }
     }
 
@@ -45,18 +46,22 @@ impl GameNode {
             frequency: 1,
             children: HashMap::new(),
             children_fully_built: false,
+            game_ids: HashSet::new(),
         }
     }
 
-    pub fn add_or_update_child(&mut self, mov: &str, game_result: GameResult, prev_node_stats: &Stats) -> &mut Self {
+    pub fn add_or_update_child(&mut self, mov: &str, game_id: usize, game_result: GameResult, prev_node_stats: &Stats) -> &mut Self {
         self.children.entry(mov.to_string())
             .and_modify(|child| {
-                // If move exists increment freq
-                child.frequency += 1;
+                if child.game_ids.insert(game_id) {
+                    child.frequency += 1;
+                }
                 // child.handle_stats(&game_result);
             })
             .or_insert_with(|| {
                 let mut new_node = GameNode::new(self.ply + 1, prev_node_stats);
+                new_node.game_ids.insert(game_id); // Add the game_id
+
                 // new_node.handle_stats(&game_result);
                 new_node
             });
@@ -82,16 +87,6 @@ impl GameNode {
     }
 
 
-    pub fn handle_stats(&mut self, game_result: &GameResult) -> &mut Self {
-        println!("Current stats are: {:?}", self);
-        match game_result {
-            GameResult::W => self.stats.white -= 1,
-            GameResult::B => self.stats.black -= 1,
-            GameResult::D => self.stats.draws -= 1,
-        }
-        self
-    }
-
     pub fn get_child_keys(&self) -> Vec<FormattedOutput> {
         let mut child_keys = self.children.iter().map(|(mov, node)| {
             FormattedOutput {
@@ -105,4 +100,14 @@ impl GameNode {
 
         child_keys
     }
+
+    // pub fn handle_stats(&mut self, game_result: &GameResult) -> &mut Self {
+    //     println!("Current stats are: {:?}", self);
+    //     match game_result {
+    //         GameResult::W => self.stats.white -= 1,
+    //         GameResult::B => self.stats.black -= 1,
+    //         GameResult::D => self.stats.draws -= 1,
+    //     }
+    //     self
+    // }
 }

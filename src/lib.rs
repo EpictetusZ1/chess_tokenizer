@@ -6,7 +6,6 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use crate::opening_tree::GameNode;
-use crate::opening_tree::build::build_tree;
 
 mod game_parser;
 pub mod opening_tree;

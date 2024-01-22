@@ -3,7 +3,6 @@ use std::{io, process};
 use crate::cli::UserInput::{Exit, NextNode, PreviousNode};
 use crate::format_output::print_possible_moves;
 use crate::Game;
-use crate::opening_tree::build::update_tree_if_needed;
 use crate::opening_tree::{GameNode, ViewPerspective};
 use crate::opening_tree::navigator::GameTreeNavigator;
 
@@ -59,7 +58,9 @@ pub fn run_cli(navigator: &mut GameTreeNavigator, formatted_game_matrix: &[Game]
             NextNode(move_str) => {
                 if current_node.children.contains_key(&move_str) {
                     navigator.move_to_node(&move_str);
-                    update_tree_if_needed(navigator, formatted_game_matrix,view_perspective, current_path.len());
+                    let new_depth = current_path.len() + 2; // For example, explore 2 moves deeper
+
+                    GameTreeNavigator::update_tree_if_needed(navigator, formatted_game_matrix, view_perspective, new_depth)
                 } else {
                     println!("Invalid move: {}", move_str);
                 }

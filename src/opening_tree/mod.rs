@@ -53,16 +53,17 @@ impl GameNode {
     pub fn add_or_update_child(&mut self, mov: &str, game_id: usize, game_result: GameResult, prev_node_stats: &Stats) -> &mut Self {
         self.children.entry(mov.to_string())
             .and_modify(|child| {
+                // TODO: Need to check if the move occurs at the correct position
                 if child.game_ids.insert(game_id) {
                     child.frequency += 1;
+                    println!("Incrementing frequency for move '{}', new frequency: {}, game_id: {}", mov, child.frequency, game_id); // Debug output
                 }
                 // child.handle_stats(&game_result);
             })
             .or_insert_with(|| {
                 let mut new_node = GameNode::new(self.ply + 1, prev_node_stats);
-                new_node.game_ids.insert(game_id); // Add the game_id
-
-                // new_node.handle_stats(&game_result);
+                new_node.game_ids.insert(game_id);
+                println!("Creating new node for move '{}', initial frequency: 1, game_id: {}", mov, game_id); // Debug output
                 new_node
             });
 

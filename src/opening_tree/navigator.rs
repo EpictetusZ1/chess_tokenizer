@@ -29,7 +29,7 @@ impl GameTreeNavigator {
 
         let mov = &moves[current_depth];
         let child_node = current_node.add_or_update_child(mov, game_id, *game_result, &current_node.stats.clone());
-        Self::add_moves_to_node(child_node, moves, current_depth + 1, max_depth, game_result, game_id);
+        Self::add_moves_to_node(child_node, moves, current_depth + 2, max_depth, game_result, game_id);
     }
 
     pub fn update_tree_if_needed(navigator: &mut GameTreeNavigator, formatted_game_matrix: &[Game], view_perspective: &ViewPerspective, max_depth: usize) {
@@ -49,8 +49,11 @@ impl GameTreeNavigator {
         // Check if the current node's children are fully built
         if current_node.children_are_not_built() {
             for (game_id, game) in formatted_game_matrix.iter().enumerate() {
-                // Self::add_moves_to_node(current_node, &game.moves, path_length,  max_depth, &game.result, game_id);
-                Self::add_moves_to_node(current_node, &game.moves, current_node.ply as usize, current_node.ply as usize + max_depth, &game.result, game_id);
+                if game.moves.len() > current_node.ply as usize {
+                    // Use the current depth of the node and max_depth for expansion
+                    let depth_to_expand = std::cmp::max(path_length, current_node.ply as usize) + max_depth;
+                    Self::add_moves_to_node(current_node, &game.moves, current_node.ply as usize, depth_to_expand, &game.result, game_id);
+                }
             }
         }
     }

@@ -95,35 +95,6 @@ impl ChessMove {
         }
     }
 
-    pub fn build_subtree_from_depth(&mut self, moves: &[String], start_depth: usize) {
-        let mut current_node = self;
-
-        for (i, move_text) in moves.iter().enumerate().skip(start_depth) {
-            if i >= start_depth + 2 {
-                break; // Limit to two moves ahead from the starting depth
-            }
-
-            let child_index = current_node.children.iter().position(|c| c.move_text == *move_text);
-
-            if let Some(index) = child_index {
-                // If the child exists, increment its frequency
-                current_node.children[index].frequency += 1;
-            } else {
-                // If the child does not exist, create a new one
-                let mut new_child = ChessMove::new(move_text, {
-                    let mut prev_moves = current_node.prev_moves.clone();
-                    prev_moves.push(move_text.to_string());
-                    prev_moves
-                });
-                new_child.frequency = 1; // Initialize frequency for new child
-                current_node.children.push(new_child);
-            }
-
-            // Update current_node to point to the child node
-            current_node = current_node.children.iter_mut().find(|c| c.move_text == *move_text).unwrap();
-        }
-    }
-
     pub fn expand_subtree(&mut self, games: &[Game]) {
         let current_depth = self.prev_moves.len();
 
@@ -155,44 +126,6 @@ impl ChessMove {
         }
     }
 
-    pub fn build_subtree_tree_for_game(&mut self, game: &Game, start_depth: usize) {
-        // Extract moves from the game and build the tree
-        let moves: Vec<String> = game.moves.clone(); // Assuming moves field in Game is a Vec<String>
-
-        let mut current_node = self; // Clone root before entering the loop
-
-        for (i, move_text) in moves.iter().enumerate() {
-            // Find the child node with the matching move text or create a new one if not found
-            let child_index = current_node
-                .children
-                .iter()
-                .position(|c| c.move_text == *move_text);
-            let child = match child_index {
-                Some(index) => &mut current_node.children[index],
-                None => {
-                    let new_child = ChessMove::new(move_text, {
-                        let mut prev_moves = current_node.prev_moves.clone();
-                        prev_moves.push(move_text.to_string());
-                        prev_moves
-                    });
-                    current_node.children.push(new_child);
-                    current_node.children.last_mut().unwrap()
-                }
-            };
-
-            // Update the frequency of the current move
-            child.frequency += 1;
-
-            // Set the current node to the child for the next iteration
-            current_node = child;
-
-            // Limit to one move ahead
-            if i >= 1 {
-                break;
-            }
-        }
-    }
-
     pub fn get_child_keys(&self) -> Vec<FormattedOutput> {
         let mut child_keys = self
             .children
@@ -207,21 +140,5 @@ impl ChessMove {
         child_keys.sort_by(|a, b| b.freq.cmp(&a.freq));
 
         child_keys
-    }
-
-    pub fn current_node(&self, path: &[String]) -> Option<&ChessMove> {
-        let mut node = self;
-        for mov_key in path {
-            if let Some(child) = node
-                .children
-                .iter()
-                .find(|child| &child.move_text == mov_key)
-            {
-                node = child;
-            } else {
-                return None;
-            }
-        }
-        Some(node)
     }
 }

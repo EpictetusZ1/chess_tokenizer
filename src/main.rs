@@ -11,10 +11,8 @@ fn main() {
     let mut opening_book =
         OpeningBook::new(ChessMove::new("root", Vec::new()), &formatted_game_matrix);
 
-    // // INIT GAME TREE
-    for game in &formatted_game_matrix {
-        opening_book.root.build_subtree_tree_for_game(game,0);
-    }
+    opening_book.root.expand_subtree(&formatted_game_matrix);
+
     opening_book.set_node(opening_book.root.clone());
     cli::run_cli(&mut opening_book);
 }

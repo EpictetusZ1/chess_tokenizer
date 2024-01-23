@@ -58,6 +58,7 @@ impl GameNode {
     pub fn get_traversal_path(&self) -> Vec<String> {
         let mut traversal_path = Vec::new();
         let mut current_node = self;
+
         while current_node.ply >= 0 {
             let move_counters = current_node.move_counters.clone();
             let mut move_keys = move_counters.keys().map(|s| s.clone()).collect::<Vec<_>>();
@@ -149,14 +150,4 @@ impl GameNode {
 
         child_keys
     }
-
-// pub fn handle_stats(&mut self, game_result: &GameResult) -> &mut Self {
-//     println!("Current stats are: {:?}", self);
-//     match game_result {
-//         GameResult::W => self.stats.white -= 1,
-//         GameResult::B => self.stats.black -= 1,
-//         GameResult::D => self.stats.draws -= 1,
-//     }
-//     self
-// }
 }

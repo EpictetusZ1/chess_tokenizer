@@ -42,5 +42,7 @@ pub fn read_file(file_path: String) -> Result<Vec<Game>, Box<dyn Error>> {
 
     let games = split_games(&contents);
 
-    Ok(process_games(games))
+    // Ok(process_games(games))
+    // return only the first 10 games
+    Ok(process_games(games).into_iter().take(2).collect())
 }

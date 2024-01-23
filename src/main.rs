@@ -1,11 +1,13 @@
+#![allow(unused_imports)]
+use std::env;
 use opening_tree::cli::{get_file_by_path};
 use opening_tree::{cli, read_file};
 use opening_tree::opening_tree::{GameNode, ViewPerspective};
 use opening_tree::opening_tree::navigator::GameTreeNavigator;
 use opening_tree::stats::init_stats;
 
-
 fn main() {
+        env::set_var("RUST_BACKTRACE", "full");
         println!("Enter a pgn file to get started: ");
 
         let path = get_file_by_path();
@@ -19,4 +21,5 @@ fn main() {
         let mut navigator = GameTreeNavigator::new(root);
 
         cli::run_cli(&mut navigator, &formatted_game_matrix, &view_perspective);
+
 }

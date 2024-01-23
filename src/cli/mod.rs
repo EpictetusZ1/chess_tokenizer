@@ -34,7 +34,7 @@ impl UserInput {
         }
     }
 }
-pub fn run_cli(navigator: &mut GameTreeNavigator, formatted_game_matrix: &[Game], view_perspective: &ViewPerspective) {
+pub fn run_cli(navigator: &mut GameTreeNavigator, formatted_game_matrix: &[Game]) {
     loop {
         let current_path = navigator.current_path().clone();
         let current_node = navigator.current_node();
@@ -60,7 +60,7 @@ pub fn run_cli(navigator: &mut GameTreeNavigator, formatted_game_matrix: &[Game]
                     navigator.move_to_node(&move_str);
                     let new_depth = current_path.len() + 2; // For example, explore 2 moves deeper
 
-                    GameTreeNavigator::update_tree_if_needed(navigator, formatted_game_matrix, view_perspective, new_depth)
+                    // GameTreeNavigator::update_tree_if_needed(navigator, formatted_game_matrix, view_perspective, new_depth)
                 } else {
                     println!("Invalid move: {}", move_str);
                 }

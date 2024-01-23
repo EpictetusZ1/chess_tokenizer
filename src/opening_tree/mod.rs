@@ -1,4 +1,5 @@
 pub mod navigator;
+pub mod test;
 
 use std::collections::{BTreeSet, HashMap, HashSet};
 use crate::{GameResult, Ply};
@@ -10,6 +11,7 @@ pub enum ViewPerspective {
     White(String),
     Black(String)
 }
+
 
 #[derive(Debug, Clone)]
 pub struct GameNode {

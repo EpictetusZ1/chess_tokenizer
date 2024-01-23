@@ -1,7 +1,3 @@
-use crate::stats::Stats;
-use crate::{GameResult, Ply};
-use std::collections::{BTreeSet, HashMap, HashSet};
-
 #[derive(Debug)]
 pub enum ViewPerspective {
     White(String),
@@ -63,6 +59,7 @@ impl<'a> OpeningBook<'a> {
             Err("Already at the root node")
         }
     }
+
     pub fn navigate_down(&mut self, move_text: &str) -> Result<(), &'static str> {
         if let Some(current) = &self.current_node {
             self.node_stack.push(current.clone());
@@ -86,23 +83,6 @@ impl<'a> OpeningBook<'a> {
             Err("No child found with the given move.")
         }
     }
-    // pub fn navigate_down(&mut self, move_text: &str) -> Result<(), &'static str> {
-    //     if let Some(current) = &self.current_node {
-    //         // Push a clone of the current node onto the stack before changing it
-    //         self.node_stack.push(current.clone());
-    //     }
-    //
-    //     if let Some(child) = self.current_node.as_ref().and_then(|node| {
-    //         node.children.iter().find(|child| child.move_text == move_text).cloned()
-    //     }) {
-    //         self.current_node = Some(child);
-    //         Ok(())
-    //     } else {
-    //         // If no child is found, remove the last pushed node as we didn't actually navigate down
-    //         self.node_stack.pop();
-    //         Err("No child found with the given move.")
-    //     }
-    // }
 }
 
 impl ChessMove {
@@ -123,10 +103,7 @@ impl ChessMove {
                 break; // Limit to two moves ahead from the starting depth
             }
 
-            let child_index = current_node
-                .children
-                .iter()
-                .position(|c| c.move_text == *move_text);
+            let child_index = current_node.children.iter().position(|c| c.move_text == *move_text);
 
             if let Some(index) = child_index {
                 // If the child exists, increment its frequency
@@ -143,11 +120,7 @@ impl ChessMove {
             }
 
             // Update current_node to point to the child node
-            current_node = current_node
-                .children
-                .iter_mut()
-                .find(|c| c.move_text == *move_text)
-                .unwrap();
+            current_node = current_node.children.iter_mut().find(|c| c.move_text == *move_text).unwrap();
         }
     }
 
@@ -181,17 +154,6 @@ impl ChessMove {
             }
         }
     }
-    // pub fn expand_subtree(&mut self, games: &[Game]) {
-    //     let current_depth = self.prev_moves.len();
-    //
-    //     for game in games {
-    //         // Assuming `game.moves` is a Vec<String> representing the moves in the game
-    //         let moves: Vec<String> = game.moves.clone();
-    //
-    //         // Now pass the moves slice to build_subtree_from_depth
-    //         self.build_subtree_from_depth(&moves, current_depth);
-    //     }
-    // }
 
     pub fn build_subtree_tree_for_game(&mut self, game: &Game, start_depth: usize) {
         // Extract moves from the game and build the tree

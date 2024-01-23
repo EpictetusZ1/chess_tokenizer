@@ -1,8 +1,6 @@
 use crate::cli::UserInput::{Exit, NextNode, PreviousNode};
 use crate::format_output::print_possible_moves;
 use crate::opening_tree::OpeningBook;
-use crate::Game;
-use std::f32::consts::E;
 use std::{io, process};
 
 pub fn get_file_by_path() -> String {

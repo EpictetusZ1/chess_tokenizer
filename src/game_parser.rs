@@ -89,7 +89,7 @@ pub fn split_moves(moves: &[&str]) -> Vec<String> {
         let words = move_line.split_whitespace();
         for word in words {
             // Split the word if move number and a move are together with no space
-            if let Some((number, move_)) = word.split_once('.') {
+            if let Some((_number, move_)) = word.split_once('.') {
                 // Check if the part after the period isn't empty and push it as a move
                 if !move_.is_empty() {
                     split_moves.push(move_.to_string());

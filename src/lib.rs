@@ -1,7 +1,5 @@
 #![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_imports)]
-use crate::game_parser::{parse_game_data, parse_result, process_games, split_games};
+use crate::game_parser::{process_games, split_games};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;

@@ -1,4 +1,3 @@
-use crate::opening_tree::ViewPerspective;
 use crate::{Game, GameResult};
 
 #[derive(Debug, Clone, Copy)] // Add this if Stats only contains copyable types

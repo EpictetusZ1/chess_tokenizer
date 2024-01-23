@@ -1,8 +1,7 @@
-use crate::{Game, GameResult};
 use crate::opening_tree::ViewPerspective;
+use crate::{Game, GameResult};
 
-#[derive(Debug)]
-#[derive(Clone, Copy)] // Add this if Stats only contains copyable types
+#[derive(Debug, Clone, Copy)] // Add this if Stats only contains copyable types
 pub struct Stats {
     pub white: u16,
     pub black: u16,
@@ -19,9 +18,9 @@ pub fn init_stats(formatted_game_matrix: &Vec<Game>) -> Stats {
 
     for game in formatted_game_matrix {
         match game.result {
-            GameResult::W =>   all_stats.white += 1,
-            GameResult::B =>   all_stats.black += 1,
-            GameResult::D =>   all_stats.draws += 1,
+            GameResult::W => all_stats.white += 1,
+            GameResult::B => all_stats.black += 1,
+            GameResult::D => all_stats.draws += 1,
         }
     }
 

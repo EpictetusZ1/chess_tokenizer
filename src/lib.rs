@@ -1,19 +1,16 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 #![allow(unused_imports)]
-use crate::game_parser::{parse_game_data, parse_result, split_games, process_games};
+use crate::game_parser::{parse_game_data, parse_result, process_games, split_games};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
-use crate::opening_tree::GameNode;
-use crate::opening_tree::build::build_tree;
 
+pub mod cli;
+mod format_output;
 mod game_parser;
 pub mod opening_tree;
 pub mod stats;
-pub mod cli;
-mod format_output;
-
 
 #[derive(Debug, Clone, Copy)]
 pub enum GameResult {
@@ -44,4 +41,6 @@ pub fn read_file(file_path: String) -> Result<Vec<Game>, Box<dyn Error>> {
     let games = split_games(&contents);
 
     Ok(process_games(games))
+    // return only the first 10 games
+    // Ok(process_games(games).into_iter().take(2).collect())
 }

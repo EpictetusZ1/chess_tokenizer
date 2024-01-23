@@ -1,12 +1,9 @@
-use std::f32::consts::E;
-use std::{io, process};
 use crate::cli::UserInput::{Exit, NextNode, PreviousNode};
 use crate::format_output::print_possible_moves;
+use crate::opening_tree::OpeningBook;
 use crate::Game;
-use crate::opening_tree::build::update_tree_if_needed;
-use crate::opening_tree::{GameNode, ViewPerspective};
-use crate::opening_tree::navigator::GameTreeNavigator;
-
+use std::f32::consts::E;
+use std::{io, process};
 
 pub fn get_file_by_path() -> String {
     // let mut file_path = String::new();
@@ -17,7 +14,6 @@ pub fn get_file_by_path() -> String {
     String::from("games/lichess_EpictetusZ1_2024-01-17.pgn")
     // file_path.trim().to_string() // Trim the newline character at the end and return the string
 }
-
 
 pub enum UserInput {
     NextNode(String),
@@ -35,35 +31,51 @@ impl UserInput {
         }
     }
 }
-pub fn run_cli(navigator: &mut GameTreeNavigator, formatted_game_matrix: &[Game], view_perspective: &ViewPerspective) {
+
+enum ActionResult {
+    Exit,
+    Continue,
+    Error(String), // Use this variant to handle errors
+}
+
+fn process_user_input(input: String, opening_book: &mut OpeningBook) -> ActionResult {
+    match UserInput::match_args(input) {
+        PreviousNode => match opening_book.navigate_up() {
+            Ok(_) => ActionResult::Continue,
+            Err(err) => ActionResult::Error(err.to_string()),
+        },
+        Exit => ActionResult::Exit,
+        NextNode(move_str) => match opening_book.navigate_down(&move_str) {
+            Ok(_) => ActionResult::Continue,
+            Err(err) => ActionResult::Error(err.to_string()),
+        },
+    }
+}
+
+pub fn run_cli(opening_book: &mut OpeningBook) {
     loop {
-        let current_path = navigator.current_path().clone();
-        let current_node = navigator.current_node();
-        let possible_moves = current_node.get_child_keys();
-        println!("Current path: {:?}", current_path);
-        print_possible_moves(&possible_moves);
-
-        // Get user input
         let mut user_input = String::new();
-        println!("Enter your move, '..' to go back, or 'exit' to quit:");
-        io::stdin().read_line(&mut user_input)
-            .expect("Failed to read input");
 
-        // Process user input
-        match UserInput::match_args(user_input) {
-            PreviousNode => navigator.go_back(),
-            Exit => {
+        if opening_book.current_node.is_none() {
+            println!("No node selected. Enter a move or 'exit' to quit:");
+        } else {
+            let current_node = opening_book.current_node.as_ref().unwrap();
+            println!("Current node: {:?}", current_node.prev_moves);
+            let possible_moves = current_node.get_child_keys();
+            print_possible_moves(&possible_moves);
+            println!("Enter your move, '..' to go back, or 'exit' to quit:");
+        }
+
+        io::stdin()
+            .read_line(&mut user_input)
+            .expect("Failed to read input");
+        match process_user_input(user_input.trim().to_string(), opening_book) {
+            ActionResult::Exit => {
                 println!("Exiting");
-                process::exit(1);
-            },
-            NextNode(move_str) => {
-                if current_node.children.contains_key(&move_str) {
-                    navigator.move_to_node(&move_str);
-                    update_tree_if_needed(navigator, formatted_game_matrix,view_perspective, current_path.len());
-                } else {
-                    println!("Invalid move: {}", move_str);
-                }
-            },
+                process::exit(0);
+            }
+            ActionResult::Continue => (),
+            ActionResult::Error(err_msg) => println!("Error: {}", err_msg),
         }
     }
 }

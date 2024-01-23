@@ -5,7 +5,10 @@ pub fn print_possible_moves(moves: &[FormattedOutput]) {
 
     // Collect formatted strings into the vector
     for formatted_output in moves {
-        let line = format!("Move: {:<7} Freq: {}", formatted_output.mov, formatted_output.freq);
+        let line = format!(
+            "Move: {:<7} Freq: {}",
+            formatted_output.mov, formatted_output.freq
+        );
         lines.push(line);
     }
 

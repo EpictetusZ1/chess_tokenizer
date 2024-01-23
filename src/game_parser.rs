@@ -1,6 +1,5 @@
-use std::collections::HashMap;
 use crate::{Game, GameResult};
-
+use std::collections::HashMap;
 
 pub fn split_games(file_contents: &str) -> Vec<String> {
     let mut games: Vec<String> = Vec::new();
@@ -117,11 +116,7 @@ pub fn process_games(games: Vec<String>) -> Vec<Game> {
 
     all_games
 }
-// let mut game_tokens = tokenizer::Tokenizer::new(game.moves.join(" "));
-// game_tokens.tokenize();
-// println!("Game Tokens: {:?}", game_tokens);
 
-// println!("Built Game Data: {:?}", game);
 pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
     match moves.last() {
         Some(last_move) => {
@@ -129,20 +124,19 @@ pub fn handle_game_result(tags: &[&str], moves: &[String]) -> Option<Game> {
                 Some(result) => {
                     let game = build_game(tags.to_vec(), moves.to_vec(), parse_result(result));
                     Some(game) // Return the Game object
-                },
+                }
                 None => {
                     eprintln!("Could not find the result in the last move.");
                     None // Return None as no Game can be constructed
                 }
             }
-        },
+        }
         None => {
             eprintln!("There are no moves to analyze.");
             None // Return None as no Game can be constructed
         }
     }
 }
-
 
 pub fn build_game(tags: Vec<&str>, move_list: Vec<String>, g_result: GameResult) -> Game {
     let mut format_tags: HashMap<String, String> = HashMap::new();

@@ -36,7 +36,7 @@ pub fn parse_game_data(contents: &str) -> (Vec<&str>, Vec<String>) {
 
     for chunk in contents.lines() {
         if chunk.starts_with('[') {
-            //  '[' Lines are tags
+            //  '[]' Lines are tags
             tags.push(chunk);
             reading_moves = false;
         } else if chunk.trim().is_empty() && !reading_moves {
